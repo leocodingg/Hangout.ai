@@ -3,9 +3,9 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 import re
 
-from .models import Session, Participant, Message, MessageType, HangoutPlan
-from .nemotron_client import NemotronClient
-from .maps_client import GoogleMapsClient
+from models import Session, Participant, Message, MessageType, HangoutPlan
+from nemotron_client import NemotronClient
+from maps_client import GoogleMapsClient
 
 logger = logging.getLogger(__name__)
 
