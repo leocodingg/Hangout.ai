@@ -80,8 +80,8 @@ def display_session_sidebar():
             st.success(f"**Session ID:** `{st.session_state.session_id}`")
             
             # Share link
-            current_url = st.experimental_get_query_params()
-            share_url = f"{st.experimental_user().get('baseUrlPath', '')}/app?session={st.session_state.session_id}"
+            query_params = st.query_params
+            share_url = f"?session={st.session_state.session_id}"
             st.code(share_url, language="text")
             st.caption("Share this link with friends!")
             
@@ -123,10 +123,10 @@ def display_session_sidebar():
         
         if st.button("New Session"):
             create_new_session()
-            st.experimental_rerun()
+            st.rerun()
         
         if st.button("Refresh"):
-            st.experimental_rerun()
+            st.rerun()
 
 def display_chat_interface():
     """Display the main chat interface."""
@@ -138,7 +138,7 @@ def display_chat_interface():
         user_name = st.text_input("Your name:", key="name_input")
         if st.button("Join Chat") and user_name:
             st.session_state.user_name = user_name
-            st.experimental_rerun()
+            st.rerun()
         return
     
     # Display chat messages
@@ -321,7 +321,7 @@ def main():
     st.caption("Powered by NVIDIA Nemotron LLM • Plan hangouts with friends through natural conversation")
     
     # Check for session parameter in URL
-    query_params = st.experimental_get_query_params()
+    query_params = st.query_params
     if 'session' in query_params and not st.session_state.session_id:
         session_id = query_params['session'][0]
         join_session(session_id)
@@ -336,13 +336,13 @@ def main():
             if st.button("🆕 Start New Session", use_container_width=True):
                 session_id = create_new_session()
                 st.success(f"Created session: {session_id}")
-                st.experimental_rerun()
+                st.rerun()
         
         with col2:
             session_input = st.text_input("Enter session ID to join:")
             if st.button("🔗 Join Session", use_container_width=True) and session_input:
                 join_session(session_input.strip())
-                st.experimental_rerun()
+                st.rerun()
         
         return
     
