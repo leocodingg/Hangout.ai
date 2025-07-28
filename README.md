@@ -6,6 +6,33 @@ Built for the **NVIDIA Nemo Toolkit Hackathon** - showcasing intelligent convers
 
 ## Quick Start (One-Click Deploy)
 
+### Option 1: brev.dev (Recommended - Cloud Development)
+
+**One-click deploy to brev.dev:**
+
+1. **Create brev environment:**
+   ```bash
+   # Visit https://brev.dev and connect your GitHub
+   # Create new environment from: leocodingg/Hangout.ai
+   ```
+
+2. **Set environment variables in brev:**
+   - `NVIDIA_API_KEY` - Your NVIDIA API key ([Get one here](https://developer.nvidia.com/))
+   - `GOOGLE_MAPS_API_KEY` - Google Maps key (optional)
+
+3. **Launch the app:**
+   ```bash
+   streamlit run app.py
+   ```
+
+**brev.dev will automatically:**
+- Set up Python environment
+- Install dependencies from requirements.txt
+- Expose port 8501 for web access
+- Provide public URL for sharing
+
+### Option 2: Local Development
+
 ### Prerequisites
 - Python 3.8+
 - NVIDIA API Key ([Get one here](https://developer.nvidia.com/))
@@ -13,8 +40,8 @@ Built for the **NVIDIA Nemo Toolkit Hackathon** - showcasing intelligent convers
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/your-username/hangout-orchestrator.git
-cd hangout-orchestrator
+git clone https://github.com/leocodingg/Hangout.ai.git
+cd Hangout.ai
 pip install -r requirements.txt
 ```
 
