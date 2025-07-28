@@ -6,7 +6,7 @@ import sys
 import logging
 
 # Add src directory to path for imports
-src_path = os.path.join(os.path.dirname(__file__), 'hangout-orchestrator', 'src')
+src_path = os.path.join(os.path.dirname(__file__), 'src')
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
@@ -17,7 +17,7 @@ try:
     from maps_client import GoogleMapsClient
 except ImportError as e:
     st.error(f"Import error: {e}")
-    st.error("Please make sure all required modules are in the hangout-orchestrator/src directory")
+    st.error("Please make sure all required modules are in the src directory")
     st.stop()
 
 # Configure logging

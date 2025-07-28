@@ -1,0 +1,7 @@
+# brev.dev port configuration for Hangout Orchestrator AI
+ports:
+  - name: "streamlit"
+    port: 8501
+    protocol: "http"
+    public: true
+    description: "Hangout Orchestrator AI - Streamlit Web Interface"
