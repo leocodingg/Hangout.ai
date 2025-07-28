@@ -10,6 +10,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from orchestrator import HangoutOrchestrator
 from models import MessageType
+from map_component import InteractiveMapComponent
+from maps_client import GoogleMapsClient
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -36,6 +38,14 @@ def init_session_state():
         st.session_state.user_id = str(uuid.uuid4())[:8]
     if 'messages' not in st.session_state:
         st.session_state.messages = []
+    if 'maps_client' not in st.session_state:
+        st.session_state.maps_client = GoogleMapsClient()
+    if 'map_component' not in st.session_state:
+        api_key = os.getenv("GOOGLE_MAPS_API_KEY")
+        if api_key and api_key != "your_google_maps_key_here":
+            st.session_state.map_component = InteractiveMapComponent(api_key)
+        else:
+            st.session_state.map_component = None
 
 def create_new_session():
     """Create a new hangout planning session."""
@@ -181,6 +191,50 @@ def display_chat_interface():
         # Rerun to update the chat
         st.experimental_rerun()
 
+def display_interactive_map(participants, venues=None):
+    """Display the interactive map with participants and venues."""
+    if not st.session_state.map_component:
+        st.warning("Interactive map not available. Please add your Google Maps API key to .env file.")
+        return
+    
+    venues = venues or []
+    
+    # Get coordinates for participants
+    participant_coords = st.session_state.map_component.get_participant_coordinates(
+        participants, st.session_state.maps_client
+    )
+    
+    # Get coordinates for venues if available
+    venue_coords = []
+    if venues:
+        venue_coords = st.session_state.map_component.get_venue_coordinates(
+            venues, st.session_state.maps_client
+        )
+    
+    # Calculate center point
+    all_coords = []
+    for p in participant_coords:
+        if p['lat'] and p['lng']:
+            all_coords.append((p['lat'], p['lng']))
+    for v in venue_coords:
+        if v['lat'] and v['lng']:
+            all_coords.append((v['lat'], v['lng']))
+    
+    if all_coords:
+        center_lat = sum(coord[0] for coord in all_coords) / len(all_coords)
+        center_lng = sum(coord[1] for coord in all_coords) / len(all_coords)
+        center = (center_lat, center_lng)
+    else:
+        center = (37.7749, -122.4194)  # Default to SF
+    
+    # Render the map
+    st.session_state.map_component.render_map(
+        participants=participant_coords,
+        venues=venue_coords,
+        center=center,
+        zoom=12
+    )
+
 def display_plan_view():
     """Display the current plan in detail."""
     if not st.session_state.orchestrator:
@@ -190,6 +244,7 @@ def display_plan_view():
     session_data = st.session_state.orchestrator.get_session_state()
     current_plan = session_data.get('current_plan')
     finalized_plan = session_data.get('finalized_plan')
+    participants = session_data.get('participants', [])
     
     if finalized_plan:
         st.success("✅ **Plan Finalized!**")
@@ -199,11 +254,34 @@ def display_plan_view():
         plan = current_plan
     else:
         st.warning("No plan available yet. Need at least 2 participants!")
+        # Still show map with participants if available
+        if participants and st.session_state.map_component:
+            st.subheader("🗺️ Participant Locations")
+            display_interactive_map(participants, [])
         return
     
     # Main recommendation
     st.subheader("🎯 Recommendation")
     st.write(f"**{plan['venue_recommendation']}**")
+    
+    # Interactive Map
+    if st.session_state.map_component and participants:
+        st.subheader("🗺️ Interactive Map")
+        st.caption("🔵 Participants • 🟠 Recommended Venues")
+        
+        # Try to get venue data from the orchestrator if available
+        venues = []
+        if hasattr(st.session_state.orchestrator, 'maps_client') and st.session_state.orchestrator.maps_client:
+            # Get center point for venue search
+            center = st.session_state.orchestrator.maps_client.find_geographic_center(
+                [p.get('address', '') for p in participants if p.get('address')]
+            )
+            if center:
+                venues = st.session_state.orchestrator.maps_client.search_nearby_venues(
+                    center, "restaurant", 2000
+                )
+        
+        display_interactive_map(participants, venues)
     
     # Reasoning
     st.subheader("🧠 AI Reasoning")
